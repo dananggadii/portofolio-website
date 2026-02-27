@@ -7,10 +7,12 @@ import Projects from "@/components/Projects";
 import Certifications from "@/components/Certifications";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import SmoothScroll from "@/components/SmoothScroll";
 
 export default function Home() {
   return (
     <>
+      <SmoothScroll />
       <Navbar />
       <Hero />
       <About />
