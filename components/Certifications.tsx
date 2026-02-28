@@ -125,7 +125,7 @@ export default function Certifications() {
                     src={certifications[(currentIndex - 1 + certifications.length) % certifications.length].image}
                     alt="Previous certification"
                     fill
-                    className="object-contain"
+                    className="object-cover"
                   />
                 </div>
               </div>
@@ -139,7 +139,7 @@ export default function Certifications() {
                     src={certifications[currentIndex].image}
                     alt={certifications[currentIndex].title}
                     fill
-                    className="object-contain"
+                    className="object-cover"
                     priority
                   />
                 </div>
@@ -157,7 +157,7 @@ export default function Certifications() {
                     src={certifications[(currentIndex + 1) % certifications.length].image}
                     alt="Next certification"
                     fill
-                    className="object-contain"
+                    className="object-cover"
                   />
                 </div>
               </div>
@@ -174,22 +174,87 @@ export default function Certifications() {
 
             {/* Dots Indicator */}
             <div className="flex justify-center gap-2">
-              {certifications.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setIsTransitioning(true);
-                    setTimeout(() => {
-                      setCurrentIndex(index);
-                      setIsTransitioning(false);
-                    }, 300);
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? "bg-blue-600 w-6" : "bg-slate-300"
-                  }`}
-                  aria-label={`Go to certification ${index + 1}`}
-                />
-              ))}
+              {(() => {
+                const totalCerts = certifications.length;
+                const maxDots = 5;
+                
+                // If total certs <= 5, show all dots
+                if (totalCerts <= maxDots) {
+                  return certifications.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setIsTransitioning(true);
+                        setTimeout(() => {
+                          setCurrentIndex(index);
+                          setIsTransitioning(false);
+                        }, 300);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentIndex ? "bg-blue-600 w-6" : "bg-slate-300"
+                      }`}
+                      aria-label={`Go to certification ${index + 1}`}
+                    />
+                  ));
+                }
+                
+                // If total certs > 5, show sliding window
+                let startIndex = 0;
+                let activePosition = currentIndex;
+                
+                // Keep active dot at position 3 (index 3) when possible
+                if (currentIndex >= 3 && currentIndex < totalCerts - 2) {
+                  startIndex = currentIndex - 3;
+                  activePosition = 3;
+                } else if (currentIndex >= totalCerts - 2) {
+                  // Last 2 items: show last 5 dots
+                  startIndex = totalCerts - maxDots;
+                  activePosition = currentIndex - startIndex;
+                } else {
+                  // First 3 items: show first 5 dots
+                  startIndex = 0;
+                  activePosition = currentIndex;
+                }
+                
+                const visibleDots = [];
+                for (let i = 0; i < maxDots; i++) {
+                  const certIndex = startIndex + i;
+                  const isActive = i === activePosition;
+                  
+                  // Calculate opacity based on distance from active
+                  let opacity = "bg-slate-300";
+                  const distance = Math.abs(i - activePosition);
+                  
+                  if (isActive) {
+                    opacity = "bg-blue-600";
+                  } else if (distance === 1) {
+                    opacity = "bg-slate-400";
+                  } else if (distance === 2) {
+                    opacity = "bg-slate-300 opacity-70";
+                  } else {
+                    opacity = "bg-slate-300 opacity-50";
+                  }
+                  
+                  visibleDots.push(
+                    <button
+                      key={certIndex}
+                      onClick={() => {
+                        setIsTransitioning(true);
+                        setTimeout(() => {
+                          setCurrentIndex(certIndex);
+                          setIsTransitioning(false);
+                        }, 300);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        isActive ? "bg-blue-600 w-6" : opacity
+                      }`}
+                      aria-label={`Go to certification ${certIndex + 1}`}
+                    />
+                  );
+                }
+                
+                return visibleDots;
+              })()}
             </div>
           </div>
         </div>
